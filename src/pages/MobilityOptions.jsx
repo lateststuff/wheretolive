@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -79,7 +78,7 @@ export default function MobilityOptions() {
               </div>
               <Button 
                 className="w-full bg-white text-[#0057b8] border border-[#0057b8] hover:bg-[#0057b8] hover:text-white transition-colors"
-                onClick={() => window.location.href = 'https://app--ai-passport-advisor-9c5ee3a1.base44.app/chatbot'}
+                // onClick={() => window.location.href = 'https://app--ai-passport-advisor-9c5ee3a1.base44.app/chatbot'}
               >
                 {section.cta}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -145,7 +144,7 @@ export default function MobilityOptions() {
           <h3 className="text-[18px] font-semibold text-[#003087] mb-4">Ready to take the next step?</h3>
           <Button 
             className="bg-[#0057b8] hover:bg-[#003087]"
-            onClick={() => window.location.href = 'https://app--ai-passport-advisor-9c5ee3a1.base44.app/contact'}
+            // onClick={() => window.location.href = 'https://app--ai-passport-advisor-9c5ee3a1.base44.app/contact'}
           >
             Connect with a Mobility Specialist
             <ArrowRight className="ml-2 h-4 w-4" />

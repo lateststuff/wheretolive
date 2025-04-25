@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { InvokeLLM } from "@/api/integrations";
+// import { InvokeLLM } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,23 +47,24 @@ export default function Advisor() {
     setIsLoading(true);
 
     try {
-      const response = await InvokeLLM({
-        prompt: `As a citizenship and immigration expert, analyze this profile and recommend the best citizenship/residency options:
-        Name: ${formData.fullName}
-        Current Citizenship: ${formData.citizenship}
-        Ancestry: ${formData.ancestry}
-        Goals: ${formData.goals.join(', ')}
-        Budget: ${formData.budget}
-        Timeline: ${formData.timeline}
-        
-        Provide detailed recommendations including:
-        - Best country options
-        - Available programs (citizenship by investment, residency, etc.)
-        - Estimated costs and timeframes
-        - Required documents
-        - Next steps`,
-        add_context_from_internet: true
-      });
+      // const response = await InvokeLLM({
+      //   prompt: `As a citizenship and immigration expert, analyze this profile and recommend the best citizenship/residency options:
+      //   Name: ${formData.fullName}
+      //   Current Citizenship: ${formData.citizenship}
+      //   Ancestry: ${formData.ancestry}
+      //   Goals: ${formData.goals.join(', ')}
+      //   Budget: ${formData.budget}
+      //   Timeline: ${formData.timeline}
+      //   
+      //   Provide detailed recommendations including:
+      //   - Best country options
+      //   - Available programs (citizenship by investment, residency, etc.)
+      //   - Estimated costs and timeframes
+      //   - Required documents
+      //   - Next steps`,
+      //   add_context_from_internet: true
+      // });
+      const response = "Based on your profile, here are some recommendations... [Details]"; // TEMP: Hardcoded response
 
       setResults(response);
       

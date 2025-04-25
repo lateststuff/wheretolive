@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Country } from "@/api/entities";
+// import { Country } from "@/api/entities";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,7 +32,8 @@ export default function Explorer() {
   }, []);
 
   const loadCountries = async () => {
-    const data = await Country.list();
+    // const data = await Country.list();
+    const data = []; // TEMP: Set to empty array
     setCountries(data);
   };
 

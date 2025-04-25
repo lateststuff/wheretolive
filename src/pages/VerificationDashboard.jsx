@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
-import { Program } from "@/api/entities";
-import { ProgramVerification } from "@/api/entities";
+// import { Program } from "@/api/entities";
+// import { ProgramVerification } from "@/api/entities";
 import { 
   Card, 
   CardContent, 
@@ -87,9 +86,11 @@ export default function VerificationDashboard() {
       setLoading(true);
       try {
         // In a real implementation, these would be populated from your database
-        const programsData = await Program.list() || [];
-        const verificationsData = await ProgramVerification.list() || [];
-        
+        // const programsData = await Program.list() || [];
+        // const verificationsData = await ProgramVerification.list() || [];
+        const programsData = []; // TEMP: Set to empty array
+        const verificationsData = []; // TEMP: Set to empty array
+
         setPrograms(programsData);
         setVerifications(verificationsData);
       } catch (error) {
@@ -239,24 +240,42 @@ export default function VerificationDashboard() {
         last_verified_date: new Date().toISOString().split('T')[0],
         verified_by: "admin@example.com" // In a real app, get from current user
       };
+
+      console.log("Would update/create verification:", verificationData); // TEMP: Log instead of calling API
+
+      // if (selectedVerification) {
+      //   // Update existing verification
+      //   await ProgramVerification.update(selectedVerification.id, verificationData);
+      // } else {
+      //   // Create new verification
+      //   await ProgramVerification.create(verificationData);
+      // }
       
-      if (selectedVerification) {
-        // Update existing verification
-        await ProgramVerification.update(selectedVerification.id, verificationData);
-      } else {
-        // Create new verification
-        await ProgramVerification.create(verificationData);
-      }
-      
-      // Refresh verifications
-      const updatedVerifications = await ProgramVerification.list();
+      // TEMP: Simulate update locally
+      const updatedVerifications = selectedVerification 
+        ? verifications.map(v => v.id === selectedVerification.id ? {...v, ...verificationData} : v)
+        : [...verifications, {...verificationData, id: `temp-${Date.now()}`}]; // Assign temporary ID
       setVerifications(updatedVerifications);
       
       setShowVerifyDialog(false);
     } catch (error) {
       console.error("Error saving verification:", error);
-      alert("Error saving verification. Please try again.");
+      // Add user feedback (e.g., toast notification)
     }
+  };
+
+  const handleBulkAction = async (action) => {
+    console.log(`Would perform bulk action: ${action}`); // TEMP: Log instead of calling API
+    // Example: Implement bulk verification, deletion, etc.
+    // const selectedProgramIds = programs.filter(p => p.isSelected).map(p => p.id);
+    // if (action === 'verify') {
+    //   await ProgramVerification.bulkVerify(selectedProgramIds);
+    // }
+  };
+
+  // Function to handle selecting/deselecting all programs
+  const handleSelectAll = (checked) => {
+    // ... existing code ...
   };
 
   if (loading) {

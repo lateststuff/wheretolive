@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Provider } from "@/api/entities";
-import { Program } from "@/api/entities";
+// import { Provider } from "@/api/entities";
+// import { Program } from "@/api/entities";
 import { 
   Card, 
   CardContent, 
@@ -56,9 +56,11 @@ export default function ProviderDirectory() {
       setLoading(true);
       try {
         // In a real implementation, these would be populated from your database
-        const providersData = await Provider.list() || [];
-        const programsData = await Program.list() || [];
-        
+        // const providersData = await Provider.list() || [];
+        // const programsData = await Program.list() || [];
+        const providersData = []; // TEMP: Set to empty array
+        const programsData = []; // TEMP: Set to empty array
+
         setProviders(providersData);
         setPrograms(programsData);
       } catch (error) {

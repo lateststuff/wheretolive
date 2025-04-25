@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Program } from "@/api/entities";
+// import { Program } from "@/api/entities";
 import { 
   Card, 
   CardContent, 
@@ -85,7 +85,8 @@ export default function AdminDashboard() {
   const loadPrograms = async () => {
     setLoading(true);
     try {
-      const data = await Program.list();
+      // const data = await Program.list();
+      const data = []; // TEMP: Set to empty array
       setPrograms(data);
     } catch (error) {
       console.error("Error loading programs:", error);
@@ -134,16 +135,17 @@ export default function AdminDashboard() {
 
   const handleSave = async () => {
     try {
-      if (selectedProgram) {
-        // Update existing program
-        await Program.update(selectedProgram.id, formData);
-      } else {
-        // Create new program
-        await Program.create(formData);
-      }
+      console.log("Would update/create program:", formData); // TEMP: Log instead of calling API
+      // if (selectedProgram) {
+      //   // Update existing program
+      //   await Program.update(selectedProgram.id, formData);
+      // } else {
+      //   // Create new program
+      //   await Program.create(formData);
+      // }
       setShowEditDialog(false);
       setShowAddDialog(false);
-      loadPrograms();
+      // loadPrograms(); // Don't reload for now
     } catch (error) {
       console.error("Error saving program:", error);
     }

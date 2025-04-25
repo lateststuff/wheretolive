@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
-import { InvokeLLM } from "@/api/integrations";
-import { SendEmail } from "@/api/integrations";
+// import { InvokeLLM } from "@/api/integrations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -119,25 +117,26 @@ export default function Results() {
     
     try {
       // Get AI response
-      const response = await InvokeLLM({
-        prompt: `You are a helpful citizenship and immigration consultant specializing in second passports, residency programs, and citizenship by investment. 
-        
-        USER PROFILE:
-        Name: ${sampleProfile.full_name}
-        Current Citizenship: ${sampleProfile.citizenship}
-        Goals: ${sampleProfile.goals.join(", ")}
-        Budget: ${sampleProfile.budget.replace(/_/g, " ")}
-        
-        The user has already received these recommendations:
-        ${JSON.stringify(sampleProfile.recommendations)}
-        
-        Answer the following question professionally, accurately, and helpfully. If you don't know specific details about a program, acknowledge that and suggest where they might find that information.
-        
-        If the user asks about connecting with a specialist or consultant, encourage them to use their referral code (${referralCode}) when contacting our partner firms for special rates.
-        
-        USER QUESTION: ${userMessage.text}`,
-        add_context_from_internet: true
-      });
+      // const response = await InvokeLLM({
+      //   prompt: `You are a helpful citizenship and immigration consultant specializing in second passports, residency programs, and citizenship by investment. 
+      //   
+      //   USER PROFILE:
+      //   Name: ${sampleProfile.full_name}
+      //   Current Citizenship: ${sampleProfile.citizenship}
+      //   Goals: ${sampleProfile.goals.join(", ")}
+      //   Budget: ${sampleProfile.budget.replace(/_/g, " ")}
+      //   
+      //   The user has already received these recommendations:
+      //   ${JSON.stringify(sampleProfile.recommendations)}
+      //   
+      //   Answer the following question professionally, accurately, and helpfully. If you don't know specific details about a program, acknowledge that and suggest where they might find that information.
+      //   
+      //   If the user asks about connecting with a specialist or consultant, encourage them to use their referral code (${referralCode}) when contacting our partner firms for special rates.
+      //   
+      //   USER QUESTION: ${userMessage.text}`,
+      //   add_context_from_internet: true
+      // });
+      const response = "Thanks for your question! Regarding X, the details are Y. Let me know if you need more info."; // TEMP: Hardcoded response
       
       // Add AI response to chat
       const aiMessage = {
@@ -172,25 +171,26 @@ export default function Results() {
     }
     
     try {
-      await SendEmail({
-        to: contactEmail,
-        subject: "Your Passport Advisor Consultation Request",
-        body: `
-          <h2>Thank you for requesting a consultation!</h2>
-          <p>Dear User,</p>
-          <p>We've received your request for a specialized consultation on citizenship and residency options. One of our partner advisors will contact you shortly to discuss your specific situation and requirements.</p>
-          <p><strong>Your referral code: ${referralCode}</strong></p>
-          <p>Please mention this code when speaking with our partners to receive preferential rates.</p>
-          <p>Based on your profile, we've recommended these options:</p>
-          <ul>
-            ${sampleProfile.recommendations.map(rec => `
-              <li><strong>${rec.country}</strong> - ${rec.program_type.replace(/_/g, ' ')} (Match score: ${rec.score}/10)</li>
-            `).join('')}
-          </ul>
-          <p>We look forward to helping you achieve your global citizenship goals.</p>
-          <p>Best regards,<br>The Passport Pathways Team</p>
-        `
-      });
+      // await SendEmail({
+      //   to: contactEmail,
+      //   subject: "Your Passport Advisor Consultation Request",
+      //   body: `
+      //     <h2>Thank you for requesting a consultation!</h2>
+      //     <p>Dear User,</p>
+      //     <p>We've received your request for a specialized consultation on citizenship and residency options. One of our partner advisors will contact you shortly to discuss your specific situation and requirements.</p>
+      //     <p><strong>Your referral code: ${referralCode}</strong></p>
+      //     <p>Please mention this code when speaking with our partners to receive preferential rates.</p>
+      //     <p>Based on your profile, we've recommended these options:</p>
+      //     <ul>
+      //       ${sampleProfile.recommendations.map(rec => `
+      //         <li><strong>${rec.country}</strong> - ${rec.program_type.replace(/_/g, ' ')} (Match score: ${rec.score}/10)</li>
+      //       `).join('')}
+      //     </ul>
+      //     <p>We look forward to helping you achieve your global citizenship goals.</p>
+      //     <p>Best regards,<br>The Passport Pathways Team</p>
+      //   `
+      // });
+      console.log(`Would send email to ${contactEmail} with referral code ${referralCode}`); // TEMP: Log instead of sending email
       
       // Add confirmation message to chat
       const confirmationMessage = {

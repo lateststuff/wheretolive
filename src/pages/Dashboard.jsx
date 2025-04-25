@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
-import { InvokeLLM } from "@/api/integrations";
+// import { InvokeLLM } from "@/api/integrations";
 import { 
   Card, 
   CardContent, 
@@ -55,12 +55,13 @@ export default function Dashboard() {
     try {
       // Initial greeting from AI
       const initialPrompt = `You are a helpful global mobility advisor. Begin the conversation with a warm greeting and ask the user about their main goal (e.g., retire abroad, get a backup passport, work as a digital nomad). Keep your response conversational and friendly.`;
-      
-      const response = await InvokeLLM({
-        prompt: initialPrompt,
-        add_context_from_internet: false // No need for web search on initial greeting
-      });
-      
+
+      // const response = await InvokeLLM({
+      //   prompt: initialPrompt,
+      //   add_context_from_internet: false // No need for web search on initial greeting
+      // });
+      const response = "Hi! I'm here to guide your global mobility journey. What's your main goal? (e.g., retire abroad, get a backup passport, work as a digital nomad)"; // TEMP: Hardcoded response
+
       setMessages([{
         id: Date.now(),
         sender: 'bot',
@@ -233,10 +234,11 @@ export default function Dashboard() {
       setUserData(updatedUserData);
       
       // Make the API call with or without web search based on the phase
-      const response = await InvokeLLM({
-        prompt: prompt,
-        add_context_from_internet: shouldUseWebSearch
-      });
+      // const response = await InvokeLLM({
+      //   prompt: prompt,
+      //   add_context_from_internet: shouldUseWebSearch
+      // });
+      const response = `Thanks for the info! Based on your needs, here are some options: [Option 1], [Option 2], [Option 3]. Let me know if you'd like more details. RECOMMENDED PROGRAMS: Option 1, Option 2, Option 3`; // TEMP: Hardcoded response
       
       // Extract recommended programs if we're at the recommendation phase
       if (updatedUserData.chatPhase === 'recommendation') {
