@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 // import { InvokeLLM } from "@/api/integrations";
+import OpenAI from 'openai';
+import ReactMarkdown from 'react-markdown';
 import { 
   Card, 
   CardContent, 
@@ -22,7 +24,8 @@ import {
   Send,
   User,
   Bot,
-  Loader2
+  Loader2,
+  UserRoundCheck
 } from "lucide-react";
 
 export default function Dashboard() {
@@ -31,15 +34,26 @@ export default function Dashboard() {
   const [userInput, setUserInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState({
-    chatPhase: 'initial', // initial, goal_identified, followup1, followup2, recommendation
+    chatPhase: 'initial', // initial, goal_identified, citizenship_identified, ancestry_identified, age_identified, email_identified, recommendation
     goal: '',
     goalType: '',
-    followUp1: '',
-    followUp2: '',
-    location: 'United States', // Default location
+    citizenship: '',
+    ancestry: '',
+    age: '',
+    email: '',
+    messageHistory: [],
   });
   
   const chatContainerRef = useRef(null);
+
+  // Initialize OpenAI client
+  // IMPORTANT: In production, NEVER expose your API key directly in frontend code.
+  // Use a backend proxy to handle API calls.
+  // For this development example, we use Vite's env variable handling.
+  const openai = new OpenAI({
+    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true, // Required for browser usage
+  });
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -53,21 +67,26 @@ export default function Dashboard() {
     setLoading(true);
     
     try {
-      // Initial greeting from AI
-      const initialPrompt = `You are a helpful global mobility advisor. Begin the conversation with a warm greeting and ask the user about their main goal (e.g., retire abroad, get a backup passport, work as a digital nomad). Keep your response conversational and friendly.`;
-
-      // const response = await InvokeLLM({
-      //   prompt: initialPrompt,
-      //   add_context_from_internet: false // No need for web search on initial greeting
-      // });
-      const response = "Hi! I'm here to guide your global mobility journey. What's your main goal? (e.g., retire abroad, get a backup passport, work as a digital nomad)"; // TEMP: Hardcoded response
-
-      setMessages([{
+      const systemPrompt = `You are a helpful global mobility advisor. Begin the conversation with a warm greeting and ask the user about their main goal (e.g., retire abroad, get a backup passport, work as a digital nomad). Keep your response conversational and friendly.`;
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "system", content: systemPrompt }]
+      });
+      const response = completion.choices[0].message.content;
+      
+      const initialBotMessage = {
         id: Date.now(),
         sender: 'bot',
         content: response,
         timestamp: new Date()
-      }]);
+      };
+      setMessages([initialBotMessage]);
+      setUserData(prev => ({ ...prev, chatPhase: 'initial', messageHistory: [
+        { role: "system", content: systemPrompt },
+        { role: "assistant", content: response }
+      ]}));
+      
     } catch (error) {
       console.error("Error starting chat:", error);
       setMessages([{
@@ -76,6 +95,7 @@ export default function Dashboard() {
         content: "Hi! I'm here to guide your global mobility journey. What's your main goal? (e.g., retire abroad, get a backup passport, work as a digital nomad)",
         timestamp: new Date()
       }]);
+      setUserData(prev => ({ ...prev, chatPhase: 'initial', messageHistory: []}));
     } finally {
       setLoading(false);
     }
@@ -107,14 +127,12 @@ export default function Dashboard() {
   const handleSendMessage = async () => {
     if (!userInput.trim()) return;
     
-    // Add user's message to chat
     const userMessage = {
       id: Date.now(),
       sender: 'user',
       content: userInput,
       timestamp: new Date()
     };
-    
     setMessages(prev => [...prev, userMessage]);
     
     const currentInput = userInput;
@@ -122,148 +140,102 @@ export default function Dashboard() {
     setLoading(true);
     
     try {
-      let prompt = '';
-      let shouldUseWebSearch = false;
+      let systemPrompt = '';
+      let nextChatPhase = userData.chatPhase; 
       let updatedUserData = { ...userData };
-      
-      // Process based on current chat phase
-      if (userData.chatPhase === 'initial') {
-        // User has provided their initial goal
-        const goalType = processUserGoal(currentInput);
-        
-        updatedUserData = {
-          ...updatedUserData,
-          goal: currentInput,
-          goalType: goalType,
-          chatPhase: 'goal_identified'
-        };
-        
-        // Construct prompt to ask follow-up question based on goal type
-        prompt = `The user's goal is: "${currentInput}". I've identified their goal type as ${goalType}.
-        
-        Based on this goal, ask ONE appropriate follow-up question to gather more information. 
-        
-        For retirement goals: Ask about monthly budget/income.
-        For passport/citizenship goals: Ask about current citizenship and ancestry.
-        For digital nomad goals: Ask about preferred region.
-        For relocation goals: Ask about family size and requirements.
-        For investment goals: Ask about investment budget.
-        For tax optimization: Ask about current tax situation.
-        For general goals: Ask about budget.
-        
-        Keep your response conversational, friendly, and brief (max 2 sentences). Just ask the follow-up question without listing options.`;
-        
-      } else if (userData.chatPhase === 'goal_identified') {
-        // User has answered the first follow-up question
-        updatedUserData = {
-          ...updatedUserData,
-          followUp1: currentInput,
-          chatPhase: 'followup1'
-        };
-        
-        // Construct prompt for second follow-up question
-        prompt = `The user's goal is: "${userData.goal}" (goal type: ${userData.goalType}).
-        They provided this additional information: "${currentInput}".
-        
-        Ask ONE more follow-up question to gather final information needed:
-        
-        For retirement goals: Ask about timeline for the move.
-        For passport/citizenship goals: Ask about investment budget or timeline.
-        For digital nomad goals: Ask about intended duration in each location.
-        For relocation goals: Ask about timeline.
-        For investment goals: Ask about preferred regions or industries.
-        For tax optimization: Ask about citizenship/residency constraints.
-        For general goals: Ask about specific countries of interest.
-        
-        Keep your response conversational, friendly and brief. Just ask the follow-up question without listing options.`;
-        
-      } else if (userData.chatPhase === 'followup1') {
-        // User has answered the second follow-up question
-        updatedUserData = {
-          ...updatedUserData,
-          followUp2: currentInput,
-          chatPhase: 'recommendation'
-        };
-        
-        // This is the final recommendation prompt - use web search here
-        prompt = `Generate a detailed recommendation for someone with these global mobility goals and needs:
-        
-        Main goal: ${userData.goal}
-        Goal type: ${userData.goalType}
-        Additional info 1: ${userData.followUp1}
-        Additional info 2: ${currentInput}
-        
-        Search the web for the most current and accurate information on visa programs, citizenship options, residency pathways that would suit this person.
-        
-        FORMAT YOUR RESPONSE:
-        1. Start with a clear, personalized recommendation paragraph (around 50 words)
-        2. Include 2-3 bullet points with KEY TERMS in ALL CAPS (like "CBI" or "GOLDEN VISA")
-        3. Be specific with actual program names, costs, and requirements based on current information
-        4. Include processing times and any recent changes to programs when relevant
-        5. End by listing the specific PROGRAMS you're recommending in a section titled "RECOMMENDED PROGRAMS:"
-        
-        Example format (but use real, accurate information from web search):
-        "Based on your goal to retire abroad with a $3,000 monthly budget, Portugal offers an excellent option through its D7 VISA. The pleasant climate and affordable cost of living align with your needs.
-        
-        • RESIDENCY REQUIREMENTS: Stay 7 days during first year, 14 days each subsequent year
-        • INCOME NEEDED: Proof of passive income at least €8,460 annually
-        • PATH TO CITIZENSHIP: Possible after 5 years of legal residency plus language test
-        
-        RECOMMENDED PROGRAMS:
-        Portugal D7 Visa, Portugal Golden Visa (investment option), Spain Non-Lucrative Visa"
-        
-        Remember that requirements and costs for programs may have changed recently, so search for the most up-to-date information.`;
-        
-        shouldUseWebSearch = true;
-        
-      } else {
-        // User is asking follow-up questions after recommendation
-        prompt = `The user has already received recommendations for their global mobility goals and is now asking: "${currentInput}". 
-        
-        Their original goal was: "${userData.goal}" (type: ${userData.goalType})
-        With these additional details: "${userData.followUp1}" and "${userData.followUp2}"
-        
-        Search the web for accurate, up-to-date information to answer their question.
-        Provide specific details, including costs, requirements, and application procedures if relevant.
-        Include bullet points for clarity when appropriate.
-        End with a compassionate note acknowledging that mobility decisions are important life changes.`;
-        
-        shouldUseWebSearch = true;
+
+      // Prepare message history for OpenAI
+      const currentMessagesForAPI = [
+        ...userData.messageHistory,
+        { role: "user", content: currentInput }
+      ];
+
+      // Determine the next step and construct the system prompt
+      switch (userData.chatPhase) {
+        case 'initial':
+          const goalType = processUserGoal(currentInput);
+          updatedUserData = { ...updatedUserData, goal: currentInput, goalType: goalType };
+          systemPrompt = `The user's main goal is: "${currentInput}" (identified as type: ${goalType}). 
+                          Now, ask for their current citizenship. Keep it brief and friendly.`;
+          nextChatPhase = 'goal_identified';
+          break;
+          
+        case 'goal_identified':
+          updatedUserData = { ...updatedUserData, citizenship: currentInput };
+          systemPrompt = `The user's citizenship is: "${currentInput}". 
+                          Now, ask if they have any known ancestry or heritage (e.g., Italian grandparents) that might be relevant for citizenship by descent. Keep it brief.`;
+          nextChatPhase = 'citizenship_identified';
+          break;
+
+        case 'citizenship_identified':
+          updatedUserData = { ...updatedUserData, ancestry: currentInput };
+          systemPrompt = `The user mentioned ancestry: "${currentInput}". 
+                          Now, ask for their approximate age group (e.g., 20-30, 30-40, 40-50, 50+). Keep it brief.`;
+          nextChatPhase = 'ancestry_identified';
+          break;
+
+        case 'ancestry_identified':
+          updatedUserData = { ...updatedUserData, age: currentInput };
+          systemPrompt = `The user's age group is: "${currentInput}". 
+                          Great! To send you a personalized summary later, could you please provide your email address?`;
+          nextChatPhase = 'email_identified';
+          break;
+
+        case 'email_identified':
+          updatedUserData = { ...updatedUserData, email: currentInput };
+          // This is the final prompt before recommendation
+          systemPrompt = `Okay, I have the user's email: ${currentInput}. Now, generate a detailed recommendation based on all the information gathered:
+                          Goal: ${updatedUserData.goal} (Type: ${updatedUserData.goalType})
+                          Citizenship: ${updatedUserData.citizenship}
+                          Ancestry: ${updatedUserData.ancestry}
+                          Age Group: ${updatedUserData.age}
+                          
+                          Provide a helpful summary and list 2-3 specific programs if possible under a "RECOMMENDED PROGRAMS:" heading. Render key terms like program names or types in **bold markdown**. 
+                          Also, mention that a summary will be sent to their email (though don't actually send it).`;
+          nextChatPhase = 'recommendation'; 
+          break;
+
+        case 'recommendation':
+        default:
+          // Handle follow-up questions after recommendation
+          systemPrompt = `The user is asking a follow-up question after receiving recommendations. 
+                          Their profile: Goal: ${userData.goal}, Citizenship: ${userData.citizenship}, Ancestry: ${userData.ancestry}, Age: ${userData.age}. 
+                          The chat history is provided. Answer their current question: "${currentInput}". Use **bold markdown** for emphasis where appropriate.`;
+          // Keep chatPhase as 'recommendation'
+          break;
       }
       
+      // Add the specific system prompt for this turn to the *start* of the messages for the API call
+      currentMessagesForAPI.unshift({ role: "system", content: systemPrompt });
+
+      // Make the API call to OpenAI
+      const completion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo", 
+        messages: currentMessagesForAPI
+      });
+      const response = completion.choices[0].message.content;
+      
+      // Update state: user data, chat phase, and message history
+      updatedUserData.chatPhase = nextChatPhase;
+      updatedUserData.messageHistory = [
+        ...currentMessagesForAPI, // Includes the system prompt we added
+        { role: "assistant", content: response } // Add the actual assistant response
+      ];
       setUserData(updatedUserData);
-      
-      // Make the API call with or without web search based on the phase
-      // const response = await InvokeLLM({
-      //   prompt: prompt,
-      //   add_context_from_internet: shouldUseWebSearch
-      // });
-      const response = `Thanks for the info! Based on your needs, here are some options: [Option 1], [Option 2], [Option 3]. Let me know if you'd like more details. RECOMMENDED PROGRAMS: Option 1, Option 2, Option 3`; // TEMP: Hardcoded response
-      
-      // Extract recommended programs if we're at the recommendation phase
-      if (updatedUserData.chatPhase === 'recommendation') {
-        // Try to extract recommended programs from the response
-        const programsMatch = response.match(/RECOMMENDED PROGRAMS:(.+?)($|\n\n)/s);
-        if (programsMatch && programsMatch[1]) {
-          const programsText = programsMatch[1].trim();
-          const programsList = programsText.split(',').map(p => p.trim()).filter(p => p);
-          console.log("Extracted programs:", programsList);
-          // You could store these programs in state if needed
-        }
-      }
-      
-      // Add bot response
-      setMessages(prev => [...prev, {
-        id: Date.now(),
+
+      // Add bot response to UI
+      const botMessage = {
+        id: Date.now() + 1, // Ensure unique ID
         sender: 'bot',
         content: response,
         timestamp: new Date()
-      }]);
+      };
+      setMessages(prev => [...prev, botMessage]);
       
     } catch (error) {
       console.error("Error in chat:", error);
       setMessages(prev => [...prev, {
-        id: Date.now(),
+        id: Date.now() + 1,
         sender: 'bot',
         content: "I'm sorry, I encountered a problem while processing your request. Could you try asking again?",
         timestamp: new Date()
@@ -278,17 +250,18 @@ export default function Dashboard() {
       chatPhase: 'initial',
       goal: '',
       goalType: '',
-      followUp1: '',
-      followUp2: '',
-      location: 'United States'
+      citizenship: '',
+      ancestry: '',
+      age: '',
+      email: '',
+      messageHistory: []
     });
-    
     setMessages([]);
     startChat();
   };
 
   return (
-    <div className="min-h-screen font-['Poppins']">
+    <div className={`min-h-screen font-['Poppins'] ${chatStarted ? 'chat-active-layout' : ''}`}>
       <title>Your Guide to Living Abroad</title>
 
       {!chatStarted ? (
@@ -315,7 +288,7 @@ export default function Dashboard() {
                 Discover Where You Can Live, Your Way
               </h1>
               <p className="text-[18px] text-[#444] mb-8 max-w-2xl mx-auto">
-                Retiring? Seeking a backup plan? Going nomad? Our AI guides you to your ideal destination.
+                Retiring? Seeking a backup plan? Going nomad? Our AI guides you to your ideal destination, and our expert advisors can then help get you there.
               </p>
               <Button 
                 className="start-journey-btn"
@@ -450,8 +423,8 @@ export default function Dashboard() {
           </section>
         </div>
       ) : (
-        // Chatbot UI
-        <div className="max-w-2xl mx-auto px-4 py-8">
+        // Chatbot UI - Apply wider style conditionally
+        <div className={`mx-auto px-4 py-8 ${chatStarted ? 'max-w-4xl' : 'max-w-2xl'}`}>
           <Card className="border shadow-lg">
             <CardHeader className="bg-[#0057b8] text-white">
               <CardTitle className="flex items-center">
@@ -465,7 +438,8 @@ export default function Dashboard() {
             
             <CardContent className="p-0">
               <div 
-                className="chatbot-container h-[400px] overflow-y-auto p-4"
+                // Increased height for active chat
+                className={`chatbot-container overflow-y-auto p-4 ${chatStarted ? 'h-[60vh]' : 'h-[400px]'}`}
                 ref={chatContainerRef}
               >
                 {messages.map((message) => (
@@ -490,7 +464,12 @@ export default function Dashboard() {
                         </span>
                       </div>
                       <div className="text-[16px] whitespace-pre-wrap">
-                        {message.content}
+                        {/* Render bot messages using ReactMarkdown */}
+                        {message.sender === 'bot' ? (
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        ) : (
+                          message.content
+                        )}
                       </div>
                     </div>
                   </div>
@@ -507,6 +486,22 @@ export default function Dashboard() {
             
             <CardFooter className="p-4 border-t">
               <div className="flex w-full flex-col gap-2">
+                {/* Render partner button conditionally */}
+                {userData.chatPhase === 'recommendation' && !loading && (
+                  <Button
+                    variant="outline"
+                    className="w-full mb-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                    onClick={() => {
+                      console.log("Navigate to partner contact/referral page");
+                      // Potentially navigate: navigate('/contact-partners')
+                    }}
+                  >
+                    <UserRoundCheck className="mr-2 h-4 w-4" />
+                    Explore Further with an Expert Partner
+                  </Button>
+                )}
+                
+                {/* Input and Send Button */}
                 <div className="flex gap-2">
                   <Input
                     placeholder="Type your message..."
@@ -534,7 +529,8 @@ export default function Dashboard() {
                   </Button>
                 </div>
                 
-                {userData.chatPhase === 'recommendation' && !loading && messages.length > 2 && (
+                {/* Reset button - adjusted condition */}
+                {userData.chatPhase !== 'initial' && !loading && (
                   <Button
                     variant="outline"
                     className="w-full mt-2"
@@ -544,6 +540,7 @@ export default function Dashboard() {
                   </Button>
                 )}
                 
+                {/* Disclaimer */}
                 <p className="text-xs text-gray-500 mt-3 text-center w-full">
                   This is not legal advice. Consult immigration professionals for your specific situation.
                 </p>
