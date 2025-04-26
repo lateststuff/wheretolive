@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from "@/utils";
 // import { InvokeLLM } from "@/api/integrations";
 import OpenAI from 'openai';
@@ -34,7 +34,7 @@ export default function Dashboard() {
   const [userInput, setUserInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState({
-    chatPhase: 'initial', // initial, goal_identified, citizenship_identified, ancestry_identified, age_identified, email_identified, recommendation
+    chatPhase: 'initial', // initial, goal_identified, citizenship_identified, ancestry_identified, age_identified, initial_recommendation_given, email_requested, final_recommendation_delivered
     goal: '',
     goalType: '',
     citizenship: '',
@@ -45,6 +45,7 @@ export default function Dashboard() {
   });
   
   const chatContainerRef = useRef(null);
+  const navigate = useNavigate();
 
   // Initialize OpenAI client
   // IMPORTANT: In production, NEVER expose your API key directly in frontend code.
@@ -62,13 +63,35 @@ export default function Dashboard() {
     }
   }, [messages]);
   
-  const startChat = async () => {
+  const startChat = async (goalType = 'general') => {
     setChatStarted(true);
     setLoading(true);
+    setMessages([]);
     
     try {
-      const systemPrompt = `You are a helpful global mobility advisor. Begin the conversation with a warm greeting and ask the user about their main goal (e.g., retire abroad, get a backup passport, work as a digital nomad). Keep your response conversational and friendly.`;
-      
+      let initialUserGoal = '';
+      let systemPrompt = '';
+
+      // Select the initial prompt based on the goalType
+      switch (goalType) {
+        case 'retirement':
+          initialUserGoal = "I'm interested in retiring abroad.";
+          systemPrompt = `The user clicked on "Retire Abroad". Start the conversation warmly acknowledging their interest in retirement and ask: "So- you've worked hard all your life and want to retire somewhere great I take it? What parts of the world were you imagining?"`;
+          break;
+        case 'citizenship':
+          initialUserGoal = "I'm interested in a backup passport/citizenship.";
+          systemPrompt = `The user clicked on "Backup Passport". Start by acknowledging this interest and ask: "Got it- thinking about different backup options for citizenship. There are lots of ways to do this- ancestry may provide one path and of course there are citizenship by investment programs. What's your main reason for wanting a back up plan?"`;
+          break;
+        case 'nomad':
+          initialUserGoal = "I'm interested in working remotely abroad.";
+          systemPrompt = `The user clicked on "Work Remotely". Acknowledge their interest and ask: "Awesome- you're thinking about working remotely- what parts of the world did you have in mind? There are lots of options"`;
+          break;
+        default: // Generic start
+          initialUserGoal = "Tell me about living abroad.";
+          systemPrompt = `You are a helpful global mobility advisor. Begin the conversation with a warm greeting and ask the user about their main goal (e.g., retire abroad, get a backup passport, work as a digital nomad). Keep your response conversational and friendly.`;
+          break;
+      }
+
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [{ role: "system", content: systemPrompt }]
@@ -82,19 +105,29 @@ export default function Dashboard() {
         timestamp: new Date()
       };
       setMessages([initialBotMessage]);
-      setUserData(prev => ({ ...prev, chatPhase: 'initial', messageHistory: [
-        { role: "system", content: systemPrompt },
-        { role: "assistant", content: response }
-      ]}));
+      
+      // Set user data AND the *correct next phase*
+      setUserData(prev => ({
+        ...prev,
+        goal: initialUserGoal,
+        goalType: goalType,
+        chatPhase: 'goal_identified', // <-- CORRECTED: Set phase to expect citizenship next
+        messageHistory: [
+          { role: "system", content: systemPrompt },
+          { role: "assistant", content: response }
+        ]
+      }));
       
     } catch (error) {
       console.error("Error starting chat:", error);
       setMessages([{
         id: Date.now(),
         sender: 'bot',
-        content: "Hi! I'm here to guide your global mobility journey. What's your main goal? (e.g., retire abroad, get a backup passport, work as a digital nomad)",
+        // Provide a generic starter message on error
+        content: "Hi! I'm here to guide your global mobility journey. What's your main goal?", 
         timestamp: new Date()
       }]);
+      // Reset state on error too
       setUserData(prev => ({ ...prev, chatPhase: 'initial', messageHistory: []}));
     } finally {
       setLoading(false);
@@ -126,7 +159,7 @@ export default function Dashboard() {
 
   const handleSendMessage = async () => {
     if (!userInput.trim()) return;
-    
+
     const userMessage = {
       id: Date.now(),
       sender: 'user',
@@ -134,104 +167,101 @@ export default function Dashboard() {
       timestamp: new Date()
     };
     setMessages(prev => [...prev, userMessage]);
-    
+
     const currentInput = userInput;
     setUserInput('');
     setLoading(true);
-    
+
     try {
+      console.log(`[DEBUG] Entering handleSendMessage. Current phase: ${userData.chatPhase}`);
       let systemPrompt = '';
-      let nextChatPhase = userData.chatPhase; 
+      let nextChatPhase = userData.chatPhase;
       let updatedUserData = { ...userData };
 
-      // Prepare message history for OpenAI
       const currentMessagesForAPI = [
         ...userData.messageHistory,
         { role: "user", content: currentInput }
       ];
 
-      // Determine the next step and construct the system prompt
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
       switch (userData.chatPhase) {
-        case 'initial':
+        case 'initial': 
           const goalType = processUserGoal(currentInput);
           updatedUserData = { ...updatedUserData, goal: currentInput, goalType: goalType };
-          systemPrompt = `The user's main goal is: "${currentInput}" (identified as type: ${goalType}). 
-                          Now, ask for their current citizenship. Keep it brief and friendly.`;
+          systemPrompt = `The user's goal is "${currentInput}" (type: ${goalType}). Your ONLY task now is to ask the user for their current country of citizenship. Ask nothing else. Keep it brief and friendly. Example: "Okay, aiming for ${goalType}! What's your current country of citizenship?"`;
           nextChatPhase = 'goal_identified';
           break;
-          
-        case 'goal_identified':
+
+        case 'goal_identified': 
           updatedUserData = { ...updatedUserData, citizenship: currentInput };
-          systemPrompt = `The user's citizenship is: "${currentInput}". 
-                          Now, ask if they have any known ancestry or heritage (e.g., Italian grandparents) that might be relevant for citizenship by descent. Keep it brief.`;
+          systemPrompt = `The user's citizenship is "${currentInput}". Your ONLY task now is to ask about recent family ancestry (parents, grandparents) relevant to citizenship by descent. Ask nothing else. Keep it brief. Example: "Thanks! Do you have any recent family ancestry (e.g., from Europe) that might offer citizenship paths? (Okay to say 'No' or 'Unsure')"`;
           nextChatPhase = 'citizenship_identified';
           break;
 
         case 'citizenship_identified':
           updatedUserData = { ...updatedUserData, ancestry: currentInput };
-          systemPrompt = `The user mentioned ancestry: "${currentInput}". 
-                          Now, ask for their approximate age group (e.g., 20-30, 30-40, 40-50, 50+). Keep it brief.`;
+          systemPrompt = `Ancestry info: "${currentInput}". Your ONLY task now is to ask for their approximate age group (e.g., 20s, 30s, 40s, 50+). Ask nothing else. Keep it brief. Example: "Got it. And roughly which age group are you in?"`;
           nextChatPhase = 'ancestry_identified';
           break;
 
         case 'ancestry_identified':
           updatedUserData = { ...updatedUserData, age: currentInput };
-          systemPrompt = `The user's age group is: "${currentInput}". 
-                          Great! To send you a personalized summary later, could you please provide your email address?`;
-          nextChatPhase = 'email_identified';
+          systemPrompt = `Age group: "${currentInput}". Now, provide a brief initial recommendation. Based ONLY on Goal: ${updatedUserData.goal}, Citizenship: ${updatedUserData.citizenship}, Ancestry: ${updatedUserData.ancestry}, Age: ${currentInput}. Generate a concise summary of 1-2 promising pathways (like specific visas or citizenship types). Use **bold markdown** for program names/types. Keep this initial summary very brief. Do NOT ask any questions yet.`;
+          nextChatPhase = 'initial_recommendation_given';
           break;
 
-        case 'email_identified':
-          updatedUserData = { ...updatedUserData, email: currentInput };
-          // This is the final prompt before recommendation
-          systemPrompt = `Okay, I have the user's email: ${currentInput}. Now, generate a detailed recommendation based on all the information gathered:
-                          Goal: ${updatedUserData.goal} (Type: ${updatedUserData.goalType})
-                          Citizenship: ${updatedUserData.citizenship}
-                          Ancestry: ${updatedUserData.ancestry}
-                          Age Group: ${updatedUserData.age}
-                          
-                          Provide a helpful summary and list 2-3 specific programs if possible under a "RECOMMENDED PROGRAMS:" heading. Render key terms like program names or types in **bold markdown**. 
-                          Also, mention that a summary will be sent to their email (though don't actually send it).`;
-          nextChatPhase = 'recommendation'; 
+        case 'initial_recommendation_given':
+          systemPrompt = `Okay, those were some initial ideas. For a more detailed report covering requirements, costs, timelines, and potential alternatives tailored to you, what's the best email address to send it to? (You can also type 'skip'). Ask ONLY for the email or the option to skip.`;
+          nextChatPhase = 'email_requested';
           break;
 
-        case 'recommendation':
+        case 'email_requested':
+          if (emailRegex.test(currentInput)) {
+            updatedUserData = { ...updatedUserData, email: currentInput };
+            systemPrompt = `Perfect, got it: ${currentInput}. I'll prepare that detailed report. Your ONLY task now is to confirm receipt and invite them to connect with an expert partner using the button below for direct application assistance. Example: "Great, report is on its way to ${currentInput}! For direct help with applications, feel free to connect with an expert partner below."`;
+            nextChatPhase = 'final_recommendation_delivered';
+          } else if (currentInput.toLowerCase().trim() === 'skip') {
+            updatedUserData = { ...updatedUserData, email: 'skipped' };
+            systemPrompt = `Okay, skipping the email. Your ONLY task now is to invite them to connect with an expert partner using the button below for detailed info or application help. Example: "Okay, skipping the email. For detailed info or application help, feel free to connect with an expert partner below."`;
+            nextChatPhase = 'final_recommendation_delivered';
+          } else {
+            systemPrompt = `Hmm, that doesn't look quite like an email address. Your ONLY task now is to ask again for a valid email for the detailed report, or tell them they can type 'skip'. Ask nothing else.`;
+            nextChatPhase = 'email_requested';
+          }
+          break;
+
+        case 'final_recommendation_delivered':
         default:
-          // Handle follow-up questions after recommendation
-          systemPrompt = `The user is asking a follow-up question after receiving recommendations. 
-                          Their profile: Goal: ${userData.goal}, Citizenship: ${userData.citizenship}, Ancestry: ${userData.ancestry}, Age: ${userData.age}. 
-                          The chat history is provided. Answer their current question: "${currentInput}". Use **bold markdown** for emphasis where appropriate.`;
-          // Keep chatPhase as 'recommendation'
+          systemPrompt = `The user is asking a follow-up question after receiving recommendations and the partner connection offer. Their profile: Goal: ${userData.goal}, Citizenship: ${userData.citizenship}, Ancestry: ${userData.ancestry}, Age: ${userData.age}, Email: ${userData.email}. The chat history is provided. Answer ONLY their current question: "${currentInput}". Keep it helpful and friendly. Use **bold markdown** where appropriate. Do not ask further questions unless necessary to clarify their current one.`;
+          nextChatPhase = 'final_recommendation_delivered';
           break;
       }
       
-      // Add the specific system prompt for this turn to the *start* of the messages for the API call
+      console.log(`[DEBUG] Determined next phase: ${nextChatPhase}. Sending prompt to AI.`);
+      
       currentMessagesForAPI.unshift({ role: "system", content: systemPrompt });
 
-      // Make the API call to OpenAI
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo", 
+        model: "gpt-3.5-turbo",
         messages: currentMessagesForAPI
       });
       const response = completion.choices[0].message.content;
-      
-      // Update state: user data, chat phase, and message history
+
       updatedUserData.chatPhase = nextChatPhase;
-      updatedUserData.messageHistory = [
-        ...currentMessagesForAPI, // Includes the system prompt we added
-        { role: "assistant", content: response } // Add the actual assistant response
-      ];
+      const historyToSave = currentMessagesForAPI.filter(msg => msg.role !== 'system');
+      historyToSave.push({ role: "assistant", content: response });
+      updatedUserData.messageHistory = historyToSave;
       setUserData(updatedUserData);
 
-      // Add bot response to UI
       const botMessage = {
-        id: Date.now() + 1, // Ensure unique ID
+        id: Date.now() + 1,
         sender: 'bot',
         content: response,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botMessage]);
-      
+
     } catch (error) {
       console.error("Error in chat:", error);
       setMessages(prev => [...prev, {
@@ -249,7 +279,7 @@ export default function Dashboard() {
     setUserData({
       chatPhase: 'initial',
       goal: '',
-      goalType: '',
+      goalType: 'general',
       citizenship: '',
       ancestry: '',
       age: '',
@@ -257,7 +287,7 @@ export default function Dashboard() {
       messageHistory: []
     });
     setMessages([]);
-    startChat();
+    setChatStarted(false);
   };
 
   return (
@@ -266,33 +296,35 @@ export default function Dashboard() {
 
       {!chatStarted ? (
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <header className="px-4 sm:px-6 lg:px-8 py-4 bg-white">
+          {/* Header - Use brand colors? */}
+          <header className="px-4 sm:px-6 lg:px-8 py-4 bg-white shadow-sm">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
-              <a href="/" className="brand-title">
-                Your Guide to Living Abroad
+              {/* Use CSS class for brand title */}
+              <a href="/" className="brand-title no-underline bg-transparent p-0 hover:text-brand-blue">
+                WhereToLive
               </a>
               <Link 
                 to={createPageUrl("MobilityOptions")} 
-                className="nav-link-learning-center"
+                className="nav-link-learning-center" /* Class defined in index.css */
               >
                 Learning Center
               </Link>
             </div>
           </header>
 
-          {/* Hero Section */}
-          <div className="hero-section">
+          {/* Hero Section - Applied gradient via CSS */}
+          <div className="hero-section"> 
             <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center relative z-10">
-              <h1 className="text-[28px] sm:text-[32px] font-bold text-[#003087] mb-4">
+              <h1 className="text-[28px] sm:text-[32px] font-bold text-brand-blue-dark mb-4">
                 Discover Where You Can Live, Your Way
               </h1>
-              <p className="text-[18px] text-[#444] mb-8 max-w-2xl mx-auto">
+              <p className="text-[18px] text-neutral-700 mb-8 max-w-2xl mx-auto">
                 Retiring? Seeking a backup plan? Going nomad? Our AI guides you to your ideal destination, and our expert advisors can then help get you there.
               </p>
+              {/* Button styled via CSS class */}
               <Button 
-                className="start-journey-btn"
-                onClick={startChat}
+                className="start-journey-btn" 
+                onClick={() => startChat()} // Use default start
               >
                 Start Your Journey
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -300,35 +332,38 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Goal-Based Cards */}
+          {/* Goal-Based Cards - Update onClick handlers */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 {
+                  type: 'retirement', // Add type
                   title: "Retire Abroad",
                   description: "Plan your dream retirement with affordable visas.",
-                  icon: <Palmtree className="h-8 w-8 text-[#0057b8]" />,
+                  icon: <Palmtree className="h-8 w-8 text-brand-blue" />,
                 },
                 {
+                  type: 'citizenship', // Add type
                   title: "Backup Passport",
                   description: "Secure a second citizenship for peace of mind.",
-                  icon: <Globe className="h-8 w-8 text-[#0057b8]" />,
+                  icon: <Globe className="h-8 w-8 text-brand-blue" />,
                 },
                 {
+                  type: 'nomad', // Add type
                   title: "Work Remotely",
                   description: "Find digital nomad visas for your next adventure.",
-                  icon: <PlaneTakeoff className="h-8 w-8 text-[#0057b8]" />,
+                  icon: <PlaneTakeoff className="h-8 w-8 text-brand-blue" />,
                 }
-              ].map((card, index) => (
-                <Card key={index} className="goal-card">
+              ].map((card) => ( // Changed index to card object
+                <Card key={card.type} className="goal-card"> 
                   <CardContent className="p-6 text-center">
-                    <div className="mb-4">{card.icon}</div>
-                    <h3 className="text-[18px] font-semibold text-[#003087] mb-3">{card.title}</h3>
-                    <p className="text-[14px] text-[#444] mb-6">{card.description}</p>
+                    <div className="mb-4 inline-block p-3 bg-brand-blue-light rounded-full">{card.icon}</div>
+                    <h3 className="text-[18px] font-semibold text-brand-blue-dark mb-3">{card.title}</h3>
+                    <p className="text-[14px] text-neutral-700 mb-6">{card.description}</p>
                     <Button 
                       variant="outline" 
                       className="chat-now-btn"
-                      onClick={startChat}
+                      onClick={() => startChat(card.type)} // Pass the type here
                     >
                       Chat Now
                     </Button>
@@ -338,10 +373,10 @@ export default function Dashboard() {
             </div>
           </section>
 
-          {/* Stories Section */}
+          {/* Stories Section - Applied hover via CSS */}
           <section className="bg-white py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-[24px] font-bold text-[#003087] mb-12 text-center">
+              <h2 className="text-[24px] font-bold text-brand-blue-dark mb-12 text-center">
                 Success Stories
               </h2>
               <div className="grid md:grid-cols-2 gap-8">
@@ -362,9 +397,9 @@ export default function Dashboard() {
                   <Link 
                     key={index} 
                     to={createPageUrl("MobilityOptions")} 
-                    className="story-card"
+                    className="story-card block no-underline" /* Class adds hover effect */
                   >
-                    <Card>
+                    <Card className="h-full"> {/* Ensure card takes link height */}
                       <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                         <img 
                           src={story.image} 
@@ -373,10 +408,10 @@ export default function Dashboard() {
                         />
                       </div>
                       <CardContent className="p-6">
-                        <h3 className="text-[18px] font-semibold text-[#003087] mb-2">
+                        <h3 className="text-[18px] font-semibold text-brand-blue-dark mb-2">
                           Meet {story.name}, in {story.location}
                         </h3>
-                        <p className="text-[14px] text-[#444]">{story.story}</p>
+                        <p className="text-[14px] text-neutral-700">{story.story}</p>
                       </CardContent>
                     </Card>
                   </Link>
@@ -385,9 +420,9 @@ export default function Dashboard() {
             </div>
           </section>
 
-          {/* Guides Section */}
+          {/* Guides Section - Applied hover via CSS */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <h2 className="text-[24px] font-bold text-[#003087] mb-12 text-center">
+            <h2 className="text-[24px] font-bold text-brand-blue-dark mb-12 text-center">
               Free Guides
             </h2>
             <div className="grid md:grid-cols-2 gap-8">
@@ -406,14 +441,14 @@ export default function Dashboard() {
                 <Link 
                   key={index} 
                   to={createPageUrl("MobilityOptions")} 
-                  className="guide-card"
+                  className="guide-card block no-underline" /* Class adds hover effect */
                 >
-                  <Card>
+                  <Card className="h-full"> {/* Ensure card takes link height */}
                     <CardContent className="p-6 flex items-center gap-4">
-                      <div className="text-[#0057b8]">{guide.icon}</div>
+                      <div className="text-brand-blue p-2 bg-brand-blue-light rounded-full">{guide.icon}</div>
                       <div>
-                        <h3 className="text-[18px] font-semibold text-[#003087] mb-1">{guide.title}</h3>
-                        <p className="text-[14px] text-[#444]">{guide.description}</p>
+                        <h3 className="text-[18px] font-semibold text-brand-blue-dark mb-1">{guide.title}</h3>
+                        <p className="text-[14px] text-neutral-700">{guide.description}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -423,15 +458,16 @@ export default function Dashboard() {
           </section>
         </div>
       ) : (
-        // Chatbot UI - Apply wider style conditionally
+        // Chatbot UI
         <div className={`mx-auto px-4 py-8 ${chatStarted ? 'max-w-4xl' : 'max-w-2xl'}`}>
           <Card className="border shadow-lg">
-            <CardHeader className="bg-[#0057b8] text-white">
+            {/* Header - Use brand colors */}
+            <CardHeader className="bg-brand-blue text-white">
               <CardTitle className="flex items-center">
                 <Globe className="mr-2 h-5 w-5" />
                 Your Global Mobility Guide
               </CardTitle>
-              <CardDescription className="text-blue-100">
+              <CardDescription className="text-blue-100"> {/* Consider a lighter brand color variable */}
                 I'll help you find your ideal destination abroad
               </CardDescription>
             </CardHeader>
@@ -447,11 +483,12 @@ export default function Dashboard() {
                     key={message.id}
                     className={`my-3 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
+                    {/* Chat bubble with shadow */}
                     <div className={`
-                      p-3 rounded-lg max-w-[80%]
+                      p-3 rounded-lg max-w-[80%] shadow-md 
                       ${message.sender === 'user' 
-                        ? 'bg-blue-600 text-white rounded-br-none' 
-                        : 'bg-gray-100 text-gray-800 rounded-bl-none'}
+                        ? 'bg-brand-blue text-white rounded-br-none' 
+                        : 'bg-gray-100 text-neutral-900 rounded-bl-none'}
                     `}>
                       <div className="flex items-center mb-1">
                         {message.sender === 'user' ? (
@@ -463,9 +500,10 @@ export default function Dashboard() {
                           {message.sender === 'user' ? 'You' : 'Guide'}
                         </span>
                       </div>
-                      <div className="text-[16px] whitespace-pre-wrap">
+                      <div className="text-[16px] whitespace-pre-wrap message-content">
                         {/* Render bot messages using ReactMarkdown */}
                         {message.sender === 'bot' ? (
+                          // Temporarily removed prose classes for debugging
                           <ReactMarkdown>{message.content}</ReactMarkdown>
                         ) : (
                           message.content
@@ -476,8 +514,12 @@ export default function Dashboard() {
                 ))}
                 {loading && (
                   <div className="my-3 flex justify-start">
-                    <div className="p-3 rounded-lg max-w-[80%] bg-gray-100 text-gray-800">
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                    <div className="p-3 rounded-lg max-w-[80%] bg-gray-100 text-neutral-900 shadow-md">
+                      {/* Loading indicator with text */}
+                      <div className="flex items-center space-x-2 text-sm text-neutral-600">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Thinking...</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -486,22 +528,22 @@ export default function Dashboard() {
             
             <CardFooter className="p-4 border-t">
               <div className="flex w-full flex-col gap-2">
-                {/* Render partner button conditionally */}
-                {userData.chatPhase === 'recommendation' && !loading && (
+                {/* Partner button - Restore condition */}
+                {userData.chatPhase === 'final_recommendation_delivered' && !loading && (
                   <Button
-                    variant="outline"
-                    className="w-full mb-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                    variant="default"
+                    className="w-full mb-2 bg-brand-blue hover:bg-brand-blue-dark text-white"
                     onClick={() => {
-                      console.log("Navigate to partner contact/referral page");
-                      // Potentially navigate: navigate('/contact-partners')
+                      console.log("Navigating to partner contact page");
+                      navigate('/contact-partner');
                     }}
                   >
                     <UserRoundCheck className="mr-2 h-4 w-4" />
-                    Explore Further with an Expert Partner
+                    Connect with an Expert Partner
                   </Button>
                 )}
                 
-                {/* Input and Send Button */}
+                {/* Input and Send Button - Use brand color */}
                 <div className="flex gap-2">
                   <Input
                     placeholder="Type your message..."
@@ -519,7 +561,7 @@ export default function Dashboard() {
                   <Button 
                     onClick={handleSendMessage} 
                     disabled={!userInput.trim() || loading}
-                    className="bg-[#0057b8]"
+                    className="bg-brand-blue hover:bg-brand-blue-dark" /* Use brand colors */
                   >
                     {loading ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
