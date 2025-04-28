@@ -20,6 +20,20 @@ module.exports = {
   				DEFAULT: 'hsl(var(--popover))',
   				foreground: 'hsl(var(--popover-foreground))'
   			},
+  			brand: {
+  				blue: {
+  					DEFAULT: '#0057b8',
+  					dark: '#003087',
+  					light: '#e0f2fe'
+  				},
+  			},
+  			neutral: {
+  				DEFAULT: '#64748b',
+  				100: '#f1f5f9',
+  				400: '#94a3b8',
+  				700: '#334155',
+  				900: '#0f172a'
+  			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'
@@ -61,6 +75,9 @@ module.exports = {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
+  		fontFamily: {
+  			sans: ['Inter', 'sans-serif'],
+  		},
   		keyframes: {
   			'accordion-down': {
   				from: {
@@ -85,5 +102,8 @@ module.exports = {
   		}
   	}
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+  ],
 }

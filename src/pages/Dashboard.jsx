@@ -296,44 +296,42 @@ export default function Dashboard() {
 
       {!chatStarted ? (
         <div className="max-w-7xl mx-auto">
-          {/* Header - Use brand colors? */}
+          {/* Header - Restore original structure */}
           <header className="px-4 sm:px-6 lg:px-8 py-4 bg-white shadow-sm">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
-              {/* Use CSS class for brand title */}
               <a href="/" className="brand-title no-underline bg-transparent p-0 hover:text-brand-blue">
-                WhereToLive
+                Unlock Your Life
               </a>
               <Link 
                 to={createPageUrl("MobilityOptions")} 
-                className="nav-link-learning-center" /* Class defined in index.css */
+                className="nav-link-learning-center"
               >
-                Learning Center
+                Roadmap to Residency & Citizenship Programs
               </Link>
             </div>
           </header>
 
-          {/* Hero Section - Applied gradient via CSS */}
-          <div className="hero-section"> 
+          {/* Hero Section - Restore original structure, keep updated paragraph */}
+          <div className="hero-section">
             <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center relative z-10">
               <h1 className="text-[28px] sm:text-[32px] font-bold text-brand-blue-dark mb-4">
                 Discover Where You Can Live, Your Way
               </h1>
               <p className="text-[18px] text-neutral-700 mb-8 max-w-2xl mx-auto">
-                Retiring? Seeking a backup plan? Going nomad? Our AI guides you to your ideal destination, and our expert advisors can then help get you there.
+                Countries are fiercely competing for global talent, rolling out new visas and citizenship programs yearly. Whether you seek a backup passport, digital nomad freedom, or a dream retirement, our AI crafts tailored paths, and our expert advisors turn your vision into reality.
               </p>
-              {/* Button styled via CSS class */}
               <Button 
-                className="start-journey-btn" 
-                onClick={() => startChat()} // Use default start
+                className="start-journey-btn bg-brand-blue hover:bg-brand-blue-dark text-white px-20 py-12 text-4xl"
+                onClick={() => startChat('general')}
               >
-                Start Your Journey
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Find Your Path
+                <ArrowRight className="ml-4 h-8 w-8" />
               </Button>
             </div>
           </div>
 
-          {/* Goal-Based Cards - Update onClick handlers */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          {/* Goal-Based Cards - Reduce vertical padding */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="grid md:grid-cols-3 gap-8">
               {[
                 {
@@ -369,90 +367,6 @@ export default function Dashboard() {
                     </Button>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          </section>
-
-          {/* Stories Section - Applied hover via CSS */}
-          <section className="bg-white py-20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-[24px] font-bold text-brand-blue-dark mb-12 text-center">
-                Success Stories
-              </h2>
-              <div className="grid md:grid-cols-2 gap-8">
-                {[
-                  {
-                    name: "Jane",
-                    location: "Portugal",
-                    story: "Found her perfect digital nomad lifestyle in Porto",
-                    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
-                  },
-                  {
-                    name: "John",
-                    location: "Malta",
-                    story: "Living his dream retirement in the Mediterranean",
-                    image: "https://images.unsplash.com/photo-1505236858219-8359eb29e329"
-                  }
-                ].map((story, index) => (
-                  <Link 
-                    key={index} 
-                    to={createPageUrl("MobilityOptions")} 
-                    className="story-card block no-underline" /* Class adds hover effect */
-                  >
-                    <Card className="h-full"> {/* Ensure card takes link height */}
-                      <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                        <img 
-                          src={story.image} 
-                          alt={story.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <CardContent className="p-6">
-                        <h3 className="text-[18px] font-semibold text-brand-blue-dark mb-2">
-                          Meet {story.name}, in {story.location}
-                        </h3>
-                        <p className="text-[14px] text-neutral-700">{story.story}</p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Guides Section - Applied hover via CSS */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <h2 className="text-[24px] font-bold text-brand-blue-dark mb-12 text-center">
-              Free Guides
-            </h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              {[
-                {
-                  title: "Top 5 Retirement Destinations",
-                  description: "Compare costs, visas, and lifestyle options",
-                  icon: <Palmtree className="h-6 w-6" />
-                },
-                {
-                  title: "Backup Passport Options",
-                  description: "Learn about citizenship-by-investment programs",
-                  icon: <Globe className="h-6 w-6" />
-                }
-              ].map((guide, index) => (
-                <Link 
-                  key={index} 
-                  to={createPageUrl("MobilityOptions")} 
-                  className="guide-card block no-underline" /* Class adds hover effect */
-                >
-                  <Card className="h-full"> {/* Ensure card takes link height */}
-                    <CardContent className="p-6 flex items-center gap-4">
-                      <div className="text-brand-blue p-2 bg-brand-blue-light rounded-full">{guide.icon}</div>
-                      <div>
-                        <h3 className="text-[18px] font-semibold text-brand-blue-dark mb-1">{guide.title}</h3>
-                        <p className="text-[14px] text-neutral-700">{guide.description}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
               ))}
             </div>
           </section>

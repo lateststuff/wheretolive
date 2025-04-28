@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -154,5 +157,205 @@ button:focus-visible {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f0f8ff, #ffffff);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Styles moved from Layout.jsx */
+.brand-title {
+  @apply font-['Poppins'] text-2xl font-bold text-brand-blue-dark tracking-wide no-underline p-3 bg-white transition-colors hover:text-brand-blue;
+}
+
+.nav-link-learning-center {
+  @apply text-sm text-blue-700 font-['Poppins'] hover:text-neutral-900 hover:underline;
+}
+
+.hero-section {
+  /* background: url('https://images.unsplash.com/photo-uD4qQhE9rY') no-repeat center/cover; */
+  @apply relative min-h-[300px] bg-gradient-to-br from-brand-blue-light to-white;
+}
+
+.hero-section::before {
+  content: '';
+  @apply absolute inset-0 bg-white/20 opacity-90;
+}
+
+.start-journey-btn {
+  @apply bg-brand-blue text-white rounded-lg transition-colors hover:bg-brand-blue-dark;
+}
+
+.goal-card, .story-card, .guide-card {
+  @apply rounded-lg shadow-lg transition-transform duration-300 ease-in-out border border-border hover:scale-[1.03];
+}
+
+.chat-now-btn {
+  @apply text-brand-blue border-brand-blue hover:bg-brand-blue hover:text-white;
+}
+
+/* Add styles for wider chat */
+.chat-active-layout {
+  /* No specific styles needed here unless affecting overall page layout */
+}
+.chatbot-container {
+  /* Base styles are applied inline, transitions can be added */
+  transition: height 0.3s ease-in-out;
+}
+
+@media (max-width: 600px) {
+  .hero-section {
+    @apply min-h-[200px];
+  }
+  .brand-title {
+    @apply text-xl;
+  }
+  .goal-card, .story-card, .guide-card {
+    @apply max-w-[90%] mx-auto;
+  }
+}
+
+/* Added styles for Mobility Cards Section from MobilityOptions.jsx */
+.mobility-cards-section.container { /* Added scoping class */
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 20px;
+}
+.mobility-cards-section h1 {
+  font-size: 32px;
+  color: #003087; /* Consider using Tailwind brand colors if defined */
+  text-align: center;
+  margin-bottom: 10px;
+  animation: fadeIn 1s ease-in;
+}
+.mobility-cards-section .intro {
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+.mobility-cards-section .section {
+  margin: 40px 0;
+}
+.mobility-cards-section .section h2 {
+  font-size: 24px;
+  color: #003087; /* Consider using Tailwind brand colors */
+  margin-bottom: 20px;
+  border-left: 4px solid #0057b8; /* Consider using Tailwind brand colors */
+  padding-left: 10px;
+}
+.mobility-cards-section .card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.mobility-cards-section .card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-align: center;
+}
+.mobility-cards-section .card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+.mobility-cards-section .card h3 {
+  font-size: 18px;
+  color: #003087;
+  margin-bottom: 10px;
+}
+.mobility-cards-section .card p {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 15px;
+}
+.mobility-cards-section .card a {
+  font-size: 14px;
+  color: #0057b8;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 16px;
+  border: 1px solid #0057b8;
+  border-radius: 5px;
+  transition: background 0.3s, color 0.3s;
+}
+.mobility-cards-section .card a:hover {
+  background: #0057b8;
+  color: #ffffff;
+}
+.mobility-cards-section .guides {
+  margin-top: 20px;
+}
+.mobility-cards-section .guides h4 {
+  font-size: 16px;
+  color: #003087;
+  margin-bottom: 10px;
+}
+.mobility-cards-section .guides ul {
+  list-style: none;
+  padding: 0;
+}
+.mobility-cards-section .guides li {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.mobility-cards-section .guides a {
+  color: #0057b8;
+  text-decoration: none;
+}
+.mobility-cards-section .guides a:hover {
+  text-decoration: underline;
+}
+.mobility-cards-section .cta-section {
+  text-align: center;
+  margin: 40px 0;
+}
+.mobility-cards-section .cta-section p {
+  font-size: 16px;
+  color: #444;
+  margin-bottom: 20px;
+}
+.mobility-cards-section .cta-button {
+  font-size: 18px;
+  color: #0057b8;
+  background: #ffffff;
+  padding: 12px 24px;
+  border: 2px solid #0057b8;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s, color 0.3s;
+}
+.mobility-cards-section .cta-button:hover {
+  background: #0057b8;
+  color: #ffffff;
+}
+/* Media Query - scoped inside */
+@media (max-width: 600px) {
+  .mobility-cards-section.container {
+    padding: 15px;
+    margin: 15px;
+  }
+  .mobility-cards-section h1 {
+    font-size: 26px;
+  }
+  .mobility-cards-section .intro {
+    font-size: 16px;
+  }
+  .mobility-cards-section .section h2 {
+    font-size: 20px;
+  }
+  .mobility-cards-section .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* Animation - keep global or scope if needed */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }

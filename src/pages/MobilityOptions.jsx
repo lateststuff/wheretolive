@@ -1,155 +1,251 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PlaneTakeoff, Palmtree, Globe, ArrowRight } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+
+const markdownContent = `
+### Find Your Perfect Place to Live Abroad
+
+**Your vision for a life abroad is closer than you think.** Whether you're planning retirement, seeking a second passport for security, embracing a digital nomad lifestyle, or moving your family, countries worldwide are rolling out the red carpet with tax incentives, vibrant lifestyles, and unparalleled freedom to attract global talent. But these opportunities are fading fast. In 2025, the door is closing as programs become pricier or disappear. Let our AI guide you to the best residency and citizenship options, crafted for your personal dreams, before they're gone.
+
+---
+
+### Why Move Abroad Today?
+
+The global mobility scene is changing at lightning speed. Options available just a few years ago are now extinct or cost double. Acting in 2025 unlocks game-changing benefits—travel freedom, tax relief, or a safe haven—that may vanish in 12–18 months. With years of firsthand experience and client success, we share exclusive insights to help you find your ideal destination.
+
+---
+
+### Discover Your Path by Dream
+
+#### Retire in Bliss
+Picture serene beaches or quaint towns. Retirement visas offer affordable, comfortable living with access to healthcare and community.
+
+- **Malta**: $2,000/month, English-speaking, sunny shores.
+- **Spain Non-Lucrative Visa**: Proof of funds, Schengen access.
+- **Malaysia MM2H**: $40,000 deposit, diverse culture.
+
+**[Begin Your Retirement Adventure: Chat with our AI](/)** to uncover your dream spot.
+
+#### Gain a Second Passport
+Ensure your future with a backup citizenship, providing security and global mobility in uncertain times.
+
+- **St. Kitts and Nevis**: $250,000 donation, 157 visa-free countries, 0% income tax.
+- **Dominica**: $200,000 donation, budget-friendly CBI, instant citizenship.
+- **Malta**: €600,000 contribution, EU passport in 12–36 months.
+
+**[Secure Your Future: Chat with our AI](/)** to explore passport options.
+
+#### Thrive as a Digital Nomad
+Work from stunning locales with visas tailored for remote professionals chasing freedom and flexibility.
+
+- **Portugal Digital Nomad Visa**: €3,000/year income, European charm.
+- **Thailand LTR Visa**: $1,500/month, Asian vibrancy.
+- **Grenada**: $250,000 CBI, US E-2 visa for nomads.
+
+**[Launch Your Nomad Life: Chat with our AI](/)** to find your remote work haven.
+
+#### Build a New Home for Your Family
+Choose secure, family-oriented destinations with top schools, healthcare, and opportunities for a fresh start.
+
+- **Portugal Golden Visa**: €500,000 fund, EU residency, 189 visa-free countries.
+- **Canada Start-Up Visa**: $200,000 investment, family-friendly path.
+- **Uruguay**: $525,000 real estate, citizenship in 3–5 years.
+
+**[Start Your Family's Journey: Chat with our AI](/)** to discover family-focused places.
+
+---
+
+### Inspiring Stories, Real Lives
+
+- **Elena's Golden Years**: "I retired in Spain with a Non-Lucrative Visa, soaking up culture affordably. The AI guide was a game-changer!" – Elena, 60, Spain.
+- **Liam's Nomad Quest**: "The chatbot led me to Portugal's Digital Nomad Visa. Now I code from coastal cafes!" – Liam, 30, Portugal.
+- **The Chens' Fresh Start**: "Canada's Start-Up Visa gave our family security. The process felt warm and clear." – The Chens, Canada.
+
+**Explore More Stories**: Dive into our guide to living abroad. (Note: This link will need a specific target page)
+
+---
+
+### Handy Guides to Spark Your Journey
+
+- **Top 5 Retirement Havens**: Uncover budget-friendly, sunny escapes for your next chapter.
+- **Second Passport Basics**: Master the steps to a backup citizenship for peace of mind.
+- **Nomad Visa Essentials**: Discover top visas for remote work and global exploration.
+
+**[Explore Our Guides: Discover your options](/)**
+
+---
+
+### Why 2025 Is Your Year
+
+Time's running out. Countries are hiking costs and shutting programs under global scrutiny:
+- Spain axed its Golden Visa (April 2025).
+- Portugal dropped real estate from its Golden Visa.
+- Caribbean CBI prices are soaring.
+- Italy's tightening citizenship by descent.
+
+In a few years, today's $250,000 options could hit $1M—or disappear. **Act now** to live abroad with tax savings, global access, and true freedom.
+
+---
+
+### Take the First Step Today
+
+Whatever drives you to live abroad, our AI guide is here to light the way. Share your dreams—retirement, security, or adventure—and get tailored suggestions to make them real. Ready to move forward? Connect with a mobility expert to bring your vision to life.
+
+**[Begin Your Adventure: Chat with our AI](/)**.  
+**Reach Out to an Expert**: Get in touch. (Note: This link will need a specific target page or action)
+`;
+
+// New component for the HTML structure translated to JSX
+function MobilityCardsSection() {
+  const placeholderLink = "#"; // Placeholder for links
+
+  return (
+    // Added scoping class and used class names from the provided HTML
+    <div className="mobility-cards-section container">
+      <h1 className="font-bold">Your Global Mobility Options</h1>
+      <p className="intro">Dreaming of a second passport, a new home abroad, or a nomad's freedom? Explore citizenship, residency, and lifestyle paths tailored to your goals with our AI guide and expert advisors.</p>
+
+      <div className="section">
+        <h2>Secure a Second Citizenship</h2>
+        <div className="card-grid">
+          <div className="card">
+            <h3>Second Passport</h3>
+            <p>Gain a backup passport for peace of mind and global travel freedom.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Citizenship by Investment</h3>
+            <p>Invest in a new citizenship, like St. Kitts ($250,000, 157 visa-free countries).</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Citizenship by Ancestry</h3>
+            <p>Claim citizenship through heritage, like Italy ($5,000–$15,000, EU access).</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Dual Citizenship Benefits</h3>
+            <p>Enjoy security and flexibility with multiple passports.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>EU Citizenship</h3>
+            <p>Access EU passports via Malta (€600,000) or Portugal (€500,000).</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+        </div>
+        <div className="guides">
+          <h4>Explore Citizenship Guides</h4>
+          <ul>
+            <li><a href={placeholderLink}>Second Passport Basics</a></li>
+            <li><a href={placeholderLink}>CBI Programs Compared</a></li>
+            <li><a href={placeholderLink}>Tracing Your Ancestry for Citizenship</a></li>
+            <li><a href={placeholderLink}>Why Dual Citizenship Matters</a></li>
+            <li><a href={placeholderLink}>Paths to EU Citizenship</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="section">
+        <h2>Build a Second Residence</h2>
+        <div className="card-grid">
+          <div className="card">
+            <h3>Second Residence</h3>
+            <p>Establish a new home abroad with flexible residency options.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Golden Visas</h3>
+            <p>Secure residency via investment, like Portugal (€500,000, EU access).</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Residence by Investment</h3>
+            <p>Invest in residency, like Greece (€400,000, no stay required).</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>EU Residence</h3>
+            <p>Live in Europe with programs like Spain's Non-Lucrative Visa.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Tax Residence</h3>
+            <p>Optimize taxes with residencies like Panama ($300,000, 0% tax).</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+        </div>
+        <div className="guides">
+          <h4>Explore Residence Guides</h4>
+          <ul>
+            <li><a href={placeholderLink}>Why a Second Residence?</a></li>
+            <li><a href={placeholderLink}>Golden Visa Essentials</a></li>
+            <li><a href={placeholderLink}>RBI Program Breakdown</a></li>
+            <li><a href={placeholderLink}>Living in the EU</a></li>
+            <li><a href={placeholderLink}>Tax-Friendly Residencies</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="section">
+        <h2>Embrace a Nomad Lifestyle</h2>
+        <div className="card-grid">
+          <div className="card">
+            <h3>Flag Theory</h3>
+            <p>Spread your life across countries for freedom and flexibility.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Lifestyle Design</h3>
+            <p>Craft a global life that matches your passions and goals.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Plan B Strategy</h3>
+            <p>Create a backup plan with residencies and citizenships.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Hiring Overseas</h3>
+            <p>Build a global team to support your nomad ventures.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+          <div className="card">
+            <h3>Living in Eastern Europe</h3>
+            <p>Discover affordable, vibrant hubs like Portugal or Georgia.</p>
+            <a href={placeholderLink}>Learn More</a>
+          </div>
+        </div>
+        <div className="guides">
+          <h4>Explore Nomad Guides</h4>
+          <ul>
+            <li><a href={placeholderLink}>Flag Theory Explained</a></li>
+            <li><a href={placeholderLink}>Designing Your Nomad Life</a></li>
+            <li><a href={placeholderLink}>Building a Plan B</a></li>
+            <li><a href={placeholderLink}>Hiring Globally</a></li>
+            <li><a href={placeholderLink}>Why Eastern Europe?</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="cta-section">
+        <p>Ready to secure a second passport, new residence, or nomad lifestyle? Our AI guide and expert advisors make it happen.</p>
+        <a href={placeholderLink} className="cta-button">Start Your Journey</a>
+        {/* Kept inline styles for simplicity for this specific element */}
+        <p style={{ fontSize: '16px', marginTop: '10px' }}><a href={placeholderLink} style={{ color: '#0057b8', textDecoration: 'none' }}>Connect with Experts</a></p>
+      </div>
+    </div>
+  );
+}
 
 export default function MobilityOptions() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f0f8ff] to-white p-6 md:p-8">
-      <div className="max-w-[900px] mx-auto my-[30px]">
-        {/* Header */}
-        <h1 className="font-['Poppins'] text-[28px] text-[#003087] text-center font-bold">
-          Your Options for Living Abroad
-        </h1>
-        <p className="font-['Poppins'] text-[16px] text-[#444] text-center mb-[30px]">
-          Whether you're retiring, seeking a backup passport, or working remotely, explore options to live where you thrive.
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-brand-blue-light to-white p-6 md:p-8">
+      <MobilityCardsSection />
 
-        {/* Goal-Based Cards */}
-        {[
-          {
-            title: "Retire in Paradise",
-            description: "Affordable visas for sunny, relaxed living.",
-            image: "https://images.unsplash.com/photo-1471400974796-1c823d00a96f",
-            examples: [
-              "Malta: $2,000/month, English-speaking",
-              "Spain Non-Lucrative Visa: Proof of funds"
-            ],
-            cta: "Find Your Retirement Path",
-            icon: <Palmtree className="h-6 w-6" />
-          },
-          {
-            title: "Secure a Backup Passport",
-            description: "Gain peace of mind with a second citizenship.",
-            image: "https://images.unsplash.com/photo-1484959014842-cd1d967a39cf",
-            examples: [
-              "Nauru CBI: $105,000, visa-free to Singapore",
-              "Italian Citizenship by Descent: $5,000–$15,000"
-            ],
-            cta: "Explore Backup Options",
-            icon: <Globe className="h-6 w-6" />
-          },
-          {
-            title: "Work Remotely",
-            description: "Find digital nomad visas for your next adventure.",
-            image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
-            examples: [
-              "Portugal Digital Nomad Visa: €3,000/year income",
-              "Thailand LTR Visa: $1,500/month"
-            ],
-            cta: "Start Your Nomad Journey",
-            icon: <PlaneTakeoff className="h-6 w-6" />
-          }
-        ].map((section, index) => (
-          <Card key={index} className="mb-5 hover:scale-105 transition-transform duration-300">
-            <CardContent className="p-5">
-              <img 
-                src={section.image} 
-                alt={section.title}
-                className="w-full h-[200px] object-cover opacity-90 rounded-lg mb-4"
-              />
-              <div className="flex items-center gap-2 mb-2">
-                {section.icon}
-                <h2 className="font-['Poppins'] text-[24px] text-[#003087] font-semibold">
-                  {section.title}
-                </h2>
-              </div>
-              <p className="font-['Poppins'] text-[16px] text-[#444] mb-4">
-                {section.description}
-              </p>
-              <div className="bg-gray-50 p-4 rounded-lg mb-4">
-                {section.examples.map((example, i) => (
-                  <p key={i} className="font-['Poppins'] text-[14px] text-[#444] mb-2">
-                    • {example}
-                  </p>
-                ))}
-              </div>
-              <Button 
-                className="w-full bg-white text-[#0057b8] border border-[#0057b8] hover:bg-[#0057b8] hover:text-white transition-colors"
-                // onClick={() => window.location.href = 'https://app--ai-passport-advisor-9c5ee3a1.base44.app/chatbot'}
-              >
-                {section.cta}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-
-        {/* Success Stories */}
-        <div className="my-[30px]">
-          <h2 className="font-['Poppins'] text-[24px] text-[#003087] font-semibold mb-4">
-            Success Stories
-          </h2>
-          <Card className="mb-4 hover:scale-105 transition-transform duration-300">
-            <CardContent className="p-5">
-              <h3 className="font-['Poppins'] text-[18px] text-[#003087] mb-3">Maria's Spanish Retirement</h3>
-              <p className="font-['Poppins'] text-[14px] text-[#444]">
-                "Moving to Spain with the Non-Lucrative Visa was simpler than I imagined. Now I enjoy morning walks along 
-                the Mediterranean and fresh market visits. The healthcare system is excellent, and my pension goes further here."
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="hover:scale-105 transition-transform duration-300">
-            <CardContent className="p-5">
-              <h3 className="font-['Poppins'] text-[18px] text-[#003087] mb-3">Alex's Digital Nomad Life</h3>
-              <p className="font-['Poppins'] text-[14px] text-[#444]">
-                "Portugal's D7 visa let me work remotely while exploring Europe. The tech scene in Lisbon is vibrant, 
-                cost of living is reasonable, and the local community is incredibly welcoming."
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Guides */}
-        <div className="my-[30px]">
-          <h2 className="font-['Poppins'] text-[24px] text-[#003087] font-semibold mb-4">
-            Quick Guides
-          </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <Card className="hover:scale-105 transition-transform duration-300">
-              <CardContent className="p-5 flex items-center gap-4">
-                <Palmtree className="h-8 w-8 text-[#0057b8]" />
-                <div>
-                  <h3 className="font-['Poppins'] text-[18px] text-[#003087] mb-1">Top 5 Retirement Destinations</h3>
-                  <p className="font-['Poppins'] text-[14px] text-[#444]">Compare costs, healthcare, and lifestyle options</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="hover:scale-105 transition-transform duration-300">
-              <CardContent className="p-5 flex items-center gap-4">
-                <Globe className="h-8 w-8 text-[#0057b8]" />
-                <div>
-                  <h3 className="font-['Poppins'] text-[18px] text-[#003087] mb-1">Guide to Backup Passports</h3>
-                  <p className="font-['Poppins'] text-[14px] text-[#444]">Understanding citizenship-by-investment programs</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Closing CTA */}
-        <div className="text-center mt-[30px]">
-          <h3 className="text-[18px] font-semibold text-[#003087] mb-4">Ready to take the next step?</h3>
-          <Button 
-            className="bg-[#0057b8] hover:bg-[#003087]"
-            // onClick={() => window.location.href = 'https://app--ai-passport-advisor-9c5ee3a1.base44.app/contact'}
-          >
-            Connect with a Mobility Specialist
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+      <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-lg shadow-lg mt-10 prose prose-lg max-w-none">
+        <ReactMarkdown>
+          {markdownContent}
+        </ReactMarkdown>
       </div>
     </div>
   );

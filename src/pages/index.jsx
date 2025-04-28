@@ -16,6 +16,10 @@ import VerificationDashboard from "./VerificationDashboard";
 
 import MobilityOptions from "./MobilityOptions";
 
+import ContactPartner from "./ContactPartner";
+
+import Roadmap from "./Roadmap";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -35,6 +39,10 @@ const PAGES = {
     VerificationDashboard: VerificationDashboard,
     
     MobilityOptions: MobilityOptions,
+    
+    ContactPartner: ContactPartner,
+    
+    Roadmap: Roadmap,
     
 }
 
@@ -79,6 +87,10 @@ function PagesContent() {
                 
                 <Route path="/MobilityOptions" element={<MobilityOptions />} />
                 
+                <Route path="/contact-partner" element={<ContactPartner />} />
+                
+                <Route path="/Roadmap" element={<Roadmap />} />
+                
             </Routes>
         </Layout>
     );
@@ -91,3 +103,42 @@ export default function Pages() {
         </Router>
     );
 }
+
+// Utility to generate paths based on page name
+const createPageUrl = (pageName) => `/${pageName.toLowerCase()}`;
+
+const routes = [
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      { index: true, element: <Dashboard createPageUrl={createPageUrl} /> },
+      {
+        path: createPageUrl("Advisor"),
+        element: <Advisor createPageUrl={createPageUrl} />,
+      },
+      {
+        path: createPageUrl("Results"),
+        element: <Results createPageUrl={createPageUrl} />,
+      },
+      {
+        path: createPageUrl("Explorer"),
+        element: <Explorer createPageUrl={createPageUrl} />,
+      },
+      {
+        path: createPageUrl("AdminDashboard"),
+        element: <AdminDashboard createPageUrl={createPageUrl} />,
+      },
+      {
+        path: createPageUrl("ProviderDirectory"),
+        element: <ProviderDirectory createPageUrl={createPageUrl} />,
+      },
+      {
+        path: createPageUrl("MobilityOptions"),
+        element: <MobilityOptions createPageUrl={createPageUrl} />,
+      },
+    ],
+  },
+];
+
+export { routes, createPageUrl };
