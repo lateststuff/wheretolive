@@ -20,7 +20,7 @@ export default function ExploreMembershipPage() {
           Charter is the antidote—a private, curated network of like-minded souls who treasure autonomy and family. We're not radicals, just ordinary, family-oriented individuals united in our pursuit of a life free from compulsion. Through monthly Zoom gatherings, a vibrant digital community, and exclusive in-person events and retreats, we share knowledge, resources, and opportunities to reclaim sovereignty.
         </p>
         <p className="text-lg leading-relaxed mb-10 text-gray-700">
-          From healthcare and education to global mobility, business, and asset protection, Charter empowers members with the tools to live deliberately, safeguarding their freedom and legacy. Together, we have each other's backs, forging a path to thriving in a world that often demands conformity.
+          Charter empowers members with the awareness, access and network to live deliberately, maximixing their family's freedom and legacy. We cover everything from global mobility, healthcare, childrens' education, business opportunities, wellness, asset protection and tax optimization. Together, we have each other's backs, forging a path to thriving in a world that often demands conformity.
         </p>
 
         <Link to="/join">

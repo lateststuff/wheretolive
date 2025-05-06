@@ -9,6 +9,7 @@ import MembershipPage from "./Membership.jsx"; // Keep for APPLY button
 import LoginPage from "./LoginPage.jsx"; // Assuming a LoginPage component exists or will be created
 // Removed ContactPage import
 import ExploreMembershipPage from "./ExploreMembershipPage.jsx"; // Import the new component
+import ApplyPage from "./ApplyPage.jsx"; // Import the new ApplyPage component
 
 // Placeholder for the new page - create this file later
 // Removed the placeholder component definition
@@ -37,6 +38,7 @@ function PagesContent() {
                 <Route path="/join" element={<MembershipPage />} />
                 <Route path="/login" element={<LoginPage />} /> {/* Add login route */} 
                 <Route path="/explore-membership" element={<ExploreMembershipPage />} /> {/* Use the imported component */}
+                <Route path="/apply" element={<ApplyPage />} /> {/* Add route for ApplyPage */}
                 
                 {/* Add a catch-all or Not Found route if desired */}
                  <Route path="*" element={<HomePage />} /> {/* Default to home for now */}
