@@ -65,8 +65,8 @@ export default function Layout({ children }) {
               <ul className="space-y-2 mt-2">
                  {/* Updated Footer Links - Removed Login, Changed FAQ text, Reordered */}
                  {/* Removed Login link */}
-                 <li><a href="/explore-membership" className="text-sm text-gray-300 hover:text-brand-burnt-orange hover:underline">About Us</a></li> {/* Changed text from FAQ */}
-                 <li><a href="/join" className="text-sm text-gray-300 hover:text-brand-burnt-orange hover:underline">Apply</a></li>
+                 <li><Link to="/explore-membership" className="text-sm text-gray-300 hover:text-brand-burnt-orange hover:underline">About Us</Link></li> {/* Changed text from FAQ */}
+                 <li><Link to="/join" className="text-sm text-gray-300 hover:text-brand-burnt-orange hover:underline">Apply</Link></li>
               </ul>
             </div>
           </div>
