@@ -12,8 +12,11 @@ const transporter = nodemailer.createTransport({
 });
 
 exports.handler = async function(event, context) {
+  console.log('Webhook received:', event.body);
+
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
+    console.log('Invalid method:', event.httpMethod);
     return {
       statusCode: 405,
       body: 'Method Not Allowed'
@@ -23,18 +26,21 @@ exports.handler = async function(event, context) {
   try {
     // Parse the Typeform webhook data
     const formData = JSON.parse(event.body);
+    console.log('Parsed form data:', formData);
     
     // Format the email content
     const emailContent = formatEmailContent(formData);
+    console.log('Formatted email content:', emailContent);
     
     // Send email
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: process.env.PROTON_EMAIL,
-      to: 'support@charterteams.com', // Primary recipient
-      cc: ['admin@charterteams.com'], // Additional recipients if needed
+      to: 'support@charterteams.com',
+      cc: ['admin@charterteams.com'],
       subject: 'New Charter Application Submission',
       html: emailContent
     });
+    console.log('Email sent:', info);
 
     return {
       statusCode: 200,
