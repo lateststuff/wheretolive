@@ -10,6 +10,7 @@ import LoginPage from "./LoginPage.jsx"; // Assuming a LoginPage component exist
 // Removed ContactPage import
 import ExploreMembershipPage from "./ExploreMembershipPage.jsx"; // Import the new component
 import ApplyPage from "./ApplyPage.jsx"; // Import the new ApplyPage component
+import ProtectedRoute from "../components/ProtectedRoute";
 
 // Placeholder for the new page - create this file later
 // Removed the placeholder component definition
@@ -33,15 +34,23 @@ function PagesContent() {
     return (
         <Layout>
             <Routes>            
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={
+                    <ProtectedRoute>
+                        <HomePage />
+                    </ProtectedRoute>
+                } />
                 {/* Removed /mobility, /healthcare, /community, /contact routes */}
-                <Route path="/join" element={<MembershipPage />} />
+                <Route path="/join" element={
+                    <ProtectedRoute>
+                        <MembershipPage />
+                    </ProtectedRoute>
+                } />
                 <Route path="/login" element={<LoginPage />} /> {/* Add login route */} 
                 <Route path="/explore-membership" element={<ExploreMembershipPage />} /> {/* Use the imported component */}
                 <Route path="/apply" element={<ApplyPage />} /> {/* Add route for ApplyPage */}
                 
                 {/* Add a catch-all or Not Found route if desired */}
-                 <Route path="*" element={<HomePage />} /> {/* Default to home for now */}
+                 <Route path="*" element={<LoginPage />} /> {/* Default to login for now */}
             </Routes>
         </Layout>
     );

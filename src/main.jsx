@@ -2,12 +2,12 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
-import { ChatbotProvider } from './context/ChatbotContext';
+import { AuthProvider } from './context/AuthContext'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ChatbotProvider>
+    <AuthProvider>
       <App />
-    </ChatbotProvider>
+    </AuthProvider>
   </React.StrictMode>,
 ) 
