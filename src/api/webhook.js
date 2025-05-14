@@ -1,13 +1,13 @@
 const nodemailer = require('nodemailer');
 
-// Create a transporter using Proton Mail SMTP
+// Create a transporter using Netlify's email service
 const transporter = nodemailer.createTransport({
-  host: 'smtp.protonmail.ch',
+  host: 'smtp.gmail.com',
   port: 587,
-  secure: true,
+  secure: false,
   auth: {
-    user: process.env.PROTON_EMAIL,
-    pass: process.env.PROTON_APP_PASSWORD
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
   }
 });
 
@@ -34,9 +34,8 @@ exports.handler = async function(event, context) {
     
     // Send email
     const info = await transporter.sendMail({
-      from: process.env.PROTON_EMAIL,
+      from: process.env.EMAIL_USER,
       to: 'support@charterteams.com',
-      cc: ['admin@charterteams.com'],
       subject: 'New Charter Application Submission',
       html: emailContent
     });
@@ -50,7 +49,7 @@ exports.handler = async function(event, context) {
     console.error('Error processing webhook:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal server error' })
+      body: JSON.stringify({ error: 'Internal server error', details: error.message })
     };
   }
 }
